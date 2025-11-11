@@ -16,6 +16,9 @@ interface DialProps {
   position: number;
 }
 
+const DIAL_HEIGHT = 60;
+const NUMBER_HEIGHT = 60;
+
 const Dial: React.FC<DialProps> = ({ digit, position }) => {
   const theme = useTheme();
   const translateY = useSharedValue(0);
@@ -23,8 +26,8 @@ const Dial: React.FC<DialProps> = ({ digit, position }) => {
 
   React.useEffect(() => {
     // Animate translation when digit changes
-    // Each number slot is 60px tall, so we move by digit * -60
-    translateY.value = withSpring(digit * -60, {
+    // Each number slot is NUMBER_HEIGHT tall, so we move by digit * -NUMBER_HEIGHT
+    translateY.value = withSpring(digit * -NUMBER_HEIGHT, {
       damping: 15,
       stiffness: 100,
     });
@@ -260,18 +263,18 @@ const styles = StyleSheet.create({
   },
   dialWindow: {
     width: 70,
-    height: 60,
+    height: DIAL_HEIGHT,
     overflow: 'hidden',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    position: 'absolute',
   },
   dialNumbers: {
     alignItems: 'center',
     justifyContent: 'flex-start',
+    width: 70,
   },
   numberSlot: {
-    height: 60,
+    height: NUMBER_HEIGHT,
     width: 70,
     justifyContent: 'center',
     alignItems: 'center',
@@ -280,7 +283,8 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: '700',
     fontFamily: Platform.OS === 'ios' ? 'Courier-Bold' : 'monospace',
-    lineHeight: 60,
+    lineHeight: NUMBER_HEIGHT,
+    textAlign: 'center',
   },
   dialTopShadow: {
     position: 'absolute',
