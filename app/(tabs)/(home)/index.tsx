@@ -11,34 +11,42 @@ import { useFocusEffect } from "@react-navigation/native";
 
 const FIRST_TIME_KEY = '@tally_counter_first_time';
 const DIGIT_COUNT_KEY = '@tally_counter_digit_count';
+const COUNTER_COUNT_KEY = '@tally_counter_count';
 
 export default function HomeScreen() {
   const theme = useTheme();
   const router = useRouter();
   const [showInstructions, setShowInstructions] = useState(false);
   const [digitCount, setDigitCount] = useState<2 | 3 | 4>(4);
+  const [counterCount, setCounterCount] = useState<1 | 2>(1);
 
   useEffect(() => {
     checkFirstTime();
-    loadDigitCount();
+    loadSettings();
   }, []);
 
-  // Reload digit count when screen comes into focus
+  // Reload settings when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
-      loadDigitCount();
+      loadSettings();
     }, [])
   );
 
-  const loadDigitCount = async () => {
+  const loadSettings = async () => {
     try {
-      const savedCount = await AsyncStorage.getItem(DIGIT_COUNT_KEY);
-      if (savedCount) {
-        setDigitCount(parseInt(savedCount) as 2 | 3 | 4);
-        console.log('Loaded digit count:', savedCount);
+      const savedDigitCount = await AsyncStorage.getItem(DIGIT_COUNT_KEY);
+      if (savedDigitCount) {
+        setDigitCount(parseInt(savedDigitCount) as 2 | 3 | 4);
+        console.log('Loaded digit count:', savedDigitCount);
+      }
+      
+      const savedCounterCount = await AsyncStorage.getItem(COUNTER_COUNT_KEY);
+      if (savedCounterCount) {
+        setCounterCount(parseInt(savedCounterCount) as 1 | 2);
+        console.log('Loaded counter count:', savedCounterCount);
       }
     } catch (error) {
-      console.log('Error loading digit count:', error);
+      console.log('Error loading settings:', error);
     }
   };
 
@@ -110,15 +118,19 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <Text style={[styles.title, { color: theme.colors.text }]}>
-              Vintage Tally Counter
-            </Text>
             <Text style={[styles.subtitle, { color: theme.dark ? '#8E8E93' : '#666' }]}>
               {getSubtitleText()}
             </Text>
           </View>
           
-          <TallyCounter digitCount={digitCount} />
+          <View style={styles.countersContainer}>
+            <TallyCounter digitCount={digitCount} label={counterCount === 2 ? "Counter 1" : undefined} />
+            {counterCount === 2 && (
+              <View style={styles.counterSpacer}>
+                <TallyCounter digitCount={digitCount} label="Counter 2" />
+              </View>
+            )}
+          </View>
         </ScrollView>
       </View>
 
@@ -207,7 +219,7 @@ export default function HomeScreen() {
                       <IconSymbol name="slider.horizontal.3" size={24} color={theme.colors.primary} />
                     </View>
                     <Text style={[styles.instructionText, { color: theme.dark ? '#E5E5E7' : '#333' }]}>
-                      Go to Settings to change the number of digits (2, 3, or 4)
+                      Go to Settings to change the number of counters and digits
                     </Text>
                   </View>
                 </View>
@@ -245,16 +257,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 32,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  countersContainer: {
+    alignItems: 'center',
+  },
+  counterSpacer: {
+    marginTop: 24,
   },
   headerButtonContainer: {
     padding: 6,

@@ -9,23 +9,30 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 
 const DIGIT_COUNT_KEY = '@tally_counter_digit_count';
+const COUNTER_COUNT_KEY = '@tally_counter_count';
 
 export default function ProfileScreen() {
   const theme = useTheme();
   const [digitCount, setDigitCount] = useState<2 | 3 | 4>(4);
+  const [counterCount, setCounterCount] = useState<1 | 2>(1);
 
   useEffect(() => {
-    loadDigitCount();
+    loadSettings();
   }, []);
 
-  const loadDigitCount = async () => {
+  const loadSettings = async () => {
     try {
-      const savedCount = await AsyncStorage.getItem(DIGIT_COUNT_KEY);
-      if (savedCount) {
-        setDigitCount(parseInt(savedCount) as 2 | 3 | 4);
+      const savedDigitCount = await AsyncStorage.getItem(DIGIT_COUNT_KEY);
+      if (savedDigitCount) {
+        setDigitCount(parseInt(savedDigitCount) as 2 | 3 | 4);
+      }
+      
+      const savedCounterCount = await AsyncStorage.getItem(COUNTER_COUNT_KEY);
+      if (savedCounterCount) {
+        setCounterCount(parseInt(savedCounterCount) as 1 | 2);
       }
     } catch (error) {
-      console.log('Error loading digit count:', error);
+      console.log('Error loading settings:', error);
     }
   };
 
@@ -39,6 +46,19 @@ export default function ProfileScreen() {
       console.log('Digit count saved:', count);
     } catch (error) {
       console.log('Error saving digit count:', error);
+    }
+  };
+
+  const handleCounterCountChange = async (count: 1 | 2) => {
+    try {
+      setCounterCount(count);
+      await AsyncStorage.setItem(COUNTER_COUNT_KEY, count.toString());
+      if (Platform.OS !== 'web') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      console.log('Counter count saved:', count);
+    } catch (error) {
+      console.log('Error saving counter count:', error);
     }
   };
 
@@ -60,12 +80,88 @@ export default function ProfileScreen() {
           Platform.OS !== 'ios' && { backgroundColor: theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }
         ]} glassEffectStyle="regular">
           <View style={styles.sectionHeader}>
+            <IconSymbol name="square.grid.2x2" size={24} color={theme.colors.primary} />
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Number of Counters</Text>
+          </View>
+          
+          <Text style={[styles.sectionDescription, { color: theme.dark ? '#98989D' : '#666' }]}>
+            Choose how many tally counters to display on the main screen
+          </Text>
+
+          <View style={styles.optionsContainer}>
+            <Pressable
+              onPress={() => handleCounterCountChange(1)}
+              style={({ pressed }) => [
+                styles.optionButton,
+                counterCount === 1 && styles.optionButtonActive,
+                {
+                  backgroundColor: counterCount === 1 
+                    ? theme.colors.primary 
+                    : theme.dark ? '#2C2C2E' : '#F2F2F7',
+                  opacity: pressed ? 0.7 : 1,
+                  borderColor: counterCount === 1 
+                    ? theme.colors.primary 
+                    : theme.dark ? '#3A3A3C' : '#E5E5E5',
+                }
+              ]}
+            >
+              <Text style={[
+                styles.optionText,
+                { color: counterCount === 1 ? '#FFFFFF' : theme.colors.text }
+              ]}>
+                1 Counter
+              </Text>
+              <Text style={[
+                styles.optionSubtext,
+                { color: counterCount === 1 ? 'rgba(255,255,255,0.8)' : theme.dark ? '#8E8E93' : '#666' }
+              ]}>
+                Single counter
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => handleCounterCountChange(2)}
+              style={({ pressed }) => [
+                styles.optionButton,
+                counterCount === 2 && styles.optionButtonActive,
+                {
+                  backgroundColor: counterCount === 2 
+                    ? theme.colors.primary 
+                    : theme.dark ? '#2C2C2E' : '#F2F2F7',
+                  opacity: pressed ? 0.7 : 1,
+                  borderColor: counterCount === 2 
+                    ? theme.colors.primary 
+                    : theme.dark ? '#3A3A3C' : '#E5E5E5',
+                }
+              ]}
+            >
+              <Text style={[
+                styles.optionText,
+                { color: counterCount === 2 ? '#FFFFFF' : theme.colors.text }
+              ]}>
+                2 Counters
+              </Text>
+              <Text style={[
+                styles.optionSubtext,
+                { color: counterCount === 2 ? 'rgba(255,255,255,0.8)' : theme.dark ? '#8E8E93' : '#666' }
+              ]}>
+                Dual counters
+              </Text>
+            </Pressable>
+          </View>
+        </GlassView>
+
+        <GlassView style={[
+          styles.section,
+          Platform.OS !== 'ios' && { backgroundColor: theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }
+        ]} glassEffectStyle="regular">
+          <View style={styles.sectionHeader}>
             <IconSymbol name="gearshape.fill" size={24} color={theme.colors.primary} />
             <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Counter Display</Text>
           </View>
           
           <Text style={[styles.sectionDescription, { color: theme.dark ? '#98989D' : '#666' }]}>
-            Choose how many digits to display on the tally counter
+            Choose how many digits to display on each tally counter
           </Text>
 
           <View style={styles.optionsContainer}>

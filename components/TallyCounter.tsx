@@ -18,6 +18,7 @@ interface DialProps {
 
 interface TallyCounterProps {
   digitCount?: 2 | 3 | 4;
+  label?: string;
 }
 
 const DIAL_HEIGHT = 60;
@@ -90,7 +91,7 @@ const Dial: React.FC<DialProps> = ({ digit, position }) => {
   );
 };
 
-export default function TallyCounter({ digitCount = 4 }: TallyCounterProps) {
+export default function TallyCounter({ digitCount = 4, label }: TallyCounterProps) {
   const theme = useTheme();
   const [count, setCount] = useState(0);
   const buttonScale = useSharedValue(1);
@@ -155,7 +156,7 @@ export default function TallyCounter({ digitCount = 4 }: TallyCounterProps) {
             styles.label,
             { color: theme.dark ? '#8E8E93' : '#5C4A3A' }
           ]}>
-            TALLY COUNTER
+            {label || 'TALLY COUNTER'}
           </Text>
         </View>
 
