@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Stack, useRouter } from "expo-router";
-import { StyleSheet, View, Text, Pressable, Alert, Platform, ScrollView, Modal } from "react-native";
+import { StyleSheet, View, Text, Pressable, Alert, Platform, ScrollView, Modal, Image } from "react-native";
 import { IconSymbol } from "@/components/IconSymbol";
 import { useTheme } from "@react-navigation/native";
 import TallyCounter from "@/components/TallyCounter";
@@ -118,6 +118,11 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
+            <Image 
+              source={require('@/assets/images/c46eb8d6-ff33-4140-adcb-8de9348530ba.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
             <Text style={[styles.subtitle, { color: theme.dark ? '#8E8E93' : '#666' }]}>
               {getSubtitleText()}
             </Text>
@@ -256,6 +261,11 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 32,
+  },
+  logo: {
+    width: 180,
+    height: 180,
+    marginBottom: 16,
   },
   subtitle: {
     fontSize: 16,
