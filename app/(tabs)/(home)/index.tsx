@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { StyleSheet, View, Text, Pressable, Alert, Platform, ScrollView, Modal } from "react-native";
 import { IconSymbol } from "@/components/IconSymbol";
 import { useTheme } from "@react-navigation/native";
@@ -14,6 +14,7 @@ const DIGIT_COUNT_KEY = '@tally_counter_digit_count';
 
 export default function HomeScreen() {
   const theme = useTheme();
+  const router = useRouter();
   const [showInstructions, setShowInstructions] = useState(false);
   const [digitCount, setDigitCount] = useState<2 | 3 | 4>(4);
 
@@ -71,7 +72,10 @@ export default function HomeScreen() {
 
   const renderHeaderLeft = () => (
     <Pressable
-      onPress={() => setShowInstructions(true)}
+      onPress={() => {
+        console.log('Navigating to settings page');
+        router.push('/(tabs)/profile');
+      }}
       style={styles.headerButtonContainer}
     >
       <IconSymbol
