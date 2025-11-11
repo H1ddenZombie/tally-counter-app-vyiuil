@@ -1,20 +1,48 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Stack } from "expo-router";
-import { StyleSheet, View, Text, Pressable, Alert, Platform, ScrollView } from "react-native";
+import { StyleSheet, View, Text, Pressable, Alert, Platform, ScrollView, Modal } from "react-native";
 import { IconSymbol } from "@/components/IconSymbol";
 import { useTheme } from "@react-navigation/native";
 import TallyCounter from "@/components/TallyCounter";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BlurView } from "expo-blur";
+
+const FIRST_TIME_KEY = '@tally_counter_first_time';
 
 export default function HomeScreen() {
   const theme = useTheme();
+  const [showInstructions, setShowInstructions] = useState(false);
+
+  useEffect(() => {
+    checkFirstTime();
+  }, []);
+
+  const checkFirstTime = async () => {
+    try {
+      const hasSeenInstructions = await AsyncStorage.getItem(FIRST_TIME_KEY);
+      console.log('Has seen instructions:', hasSeenInstructions);
+      
+      if (hasSeenInstructions === null) {
+        // First time user
+        setShowInstructions(true);
+        await AsyncStorage.setItem(FIRST_TIME_KEY, 'true');
+      }
+    } catch (error) {
+      console.log('Error checking first time:', error);
+    }
+  };
+
+  const handleCloseInstructions = () => {
+    setShowInstructions(false);
+  };
 
   const renderHeaderRight = () => (
     <Pressable
-      onPress={() => Alert.alert("Not Implemented", "This feature is not implemented yet")}
+      onPress={() => setShowInstructions(true)}
       style={styles.headerButtonContainer}
     >
-      <IconSymbol name="plus" color={theme.colors.primary} />
+      <IconSymbol name="questionmark.circle" color={theme.colors.primary} />
     </Pressable>
   );
 
@@ -59,34 +87,104 @@ export default function HomeScreen() {
           </View>
           
           <TallyCounter />
-
-          <View style={styles.instructions}>
-            <Text style={[styles.instructionsTitle, { color: theme.colors.text }]}>
-              How to Use
-            </Text>
-            <View style={styles.instructionItem}>
-              <Text style={[styles.instructionText, { color: theme.dark ? '#8E8E93' : '#666' }]}>
-                • Press + to increment the counter
-              </Text>
-            </View>
-            <View style={styles.instructionItem}>
-              <Text style={[styles.instructionText, { color: theme.dark ? '#8E8E93' : '#666' }]}>
-                • Press − to decrement the counter
-              </Text>
-            </View>
-            <View style={styles.instructionItem}>
-              <Text style={[styles.instructionText, { color: theme.dark ? '#8E8E93' : '#666' }]}>
-                • Press RESET to return to zero
-              </Text>
-            </View>
-            <View style={styles.instructionItem}>
-              <Text style={[styles.instructionText, { color: theme.dark ? '#8E8E93' : '#666' }]}>
-                • Watch the dials rotate like a vintage mechanical counter
-              </Text>
-            </View>
-          </View>
         </ScrollView>
       </View>
+
+      {/* Instructions Modal */}
+      <Modal
+        visible={showInstructions}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleCloseInstructions}
+      >
+        <Pressable 
+          style={styles.modalOverlay}
+          onPress={handleCloseInstructions}
+        >
+          <BlurView
+            intensity={Platform.OS === 'ios' ? 80 : 100}
+            tint={theme.dark ? 'dark' : 'light'}
+            style={styles.blurView}
+          >
+            <Pressable 
+              style={styles.modalContentWrapper}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <View style={[
+                styles.modalContent,
+                { 
+                  backgroundColor: theme.dark ? '#1C1C1E' : '#FFFFFF',
+                  borderColor: theme.dark ? '#3A3A3C' : '#E5E5E5',
+                }
+              ]}>
+                <View style={styles.modalHeader}>
+                  <Text style={[styles.modalTitle, { color: theme.colors.text }]}>
+                    How to Use
+                  </Text>
+                  <Pressable
+                    onPress={handleCloseInstructions}
+                    style={styles.closeButton}
+                  >
+                    <IconSymbol 
+                      name="xmark.circle.fill" 
+                      size={28} 
+                      color={theme.dark ? '#8E8E93' : '#666'} 
+                    />
+                  </Pressable>
+                </View>
+
+                <View style={styles.modalBody}>
+                  <View style={styles.instructionItem}>
+                    <View style={[styles.iconCircle, { backgroundColor: theme.dark ? '#2C2C2E' : '#F2F2F7' }]}>
+                      <IconSymbol name="plus" size={24} color={theme.colors.primary} />
+                    </View>
+                    <Text style={[styles.instructionText, { color: theme.dark ? '#E5E5E7' : '#333' }]}>
+                      Press + to increment the counter
+                    </Text>
+                  </View>
+
+                  <View style={styles.instructionItem}>
+                    <View style={[styles.iconCircle, { backgroundColor: theme.dark ? '#2C2C2E' : '#F2F2F7' }]}>
+                      <IconSymbol name="minus" size={24} color={theme.colors.primary} />
+                    </View>
+                    <Text style={[styles.instructionText, { color: theme.dark ? '#E5E5E7' : '#333' }]}>
+                      Press − to decrement the counter
+                    </Text>
+                  </View>
+
+                  <View style={styles.instructionItem}>
+                    <View style={[styles.iconCircle, { backgroundColor: theme.dark ? '#2C2C2E' : '#F2F2F7' }]}>
+                      <IconSymbol name="arrow.counterclockwise" size={24} color={theme.colors.primary} />
+                    </View>
+                    <Text style={[styles.instructionText, { color: theme.dark ? '#E5E5E7' : '#333' }]}>
+                      Press RESET to return to zero
+                    </Text>
+                  </View>
+
+                  <View style={styles.instructionItem}>
+                    <View style={[styles.iconCircle, { backgroundColor: theme.dark ? '#2C2C2E' : '#F2F2F7' }]}>
+                      <IconSymbol name="gearshape.2" size={24} color={theme.colors.primary} />
+                    </View>
+                    <Text style={[styles.instructionText, { color: theme.dark ? '#E5E5E7' : '#333' }]}>
+                      Watch the dials rotate like a vintage mechanical counter
+                    </Text>
+                  </View>
+                </View>
+
+                <Pressable
+                  onPress={handleCloseInstructions}
+                  style={[
+                    styles.gotItButton,
+                    { backgroundColor: theme.colors.primary }
+                  ]}
+                >
+                  <Text style={styles.gotItButtonText}>Got it!</Text>
+                </Pressable>
+              </View>
+            </Pressable>
+          </BlurView>
+        </Pressable>
+      </Modal>
     </>
   );
 }
@@ -120,20 +218,78 @@ const styles = StyleSheet.create({
   headerButtonContainer: {
     padding: 6,
   },
-  instructions: {
-    marginTop: 40,
-    paddingHorizontal: 20,
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  instructionsTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 16,
+  blurView: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContentWrapper: {
+    width: '100%',
+    paddingHorizontal: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 1,
+    boxShadow: '0px 10px 40px rgba(0, 0, 0, 0.3)',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalBody: {
+    marginBottom: 24,
   },
   instructionItem: {
-    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  iconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
   },
   instructionText: {
+    flex: 1,
     fontSize: 16,
-    lineHeight: 24,
+    lineHeight: 22,
+  },
+  gotItButton: {
+    height: 52,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+  },
+  gotItButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '600',
   },
 });
