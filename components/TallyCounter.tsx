@@ -205,10 +205,10 @@ export default function TallyCounter() {
 
         {/* Decorative screws */}
         <View style={styles.screwsContainer}>
-          <View style={[styles.screw, { backgroundColor: theme.dark ? '#48484A' : '#6B5A47' }]} />
-          <View style={[styles.screw, { backgroundColor: theme.dark ? '#48484A' : '#6B5A47' }]} />
-          <View style={[styles.screw, { backgroundColor: theme.dark ? '#48484A' : '#6B5A47' }]} />
-          <View style={[styles.screw, { backgroundColor: theme.dark ? '#48484A' : '#6B5A47' }]} />
+          <View style={[styles.screw, { backgroundColor: theme.dark ? '#48484A' : '#6B5A47', top: 0, left: 0 }]} />
+          <View style={[styles.screw, { backgroundColor: theme.dark ? '#48484A' : '#6B5A47', top: 0, right: 0 }]} />
+          <View style={[styles.screw, { backgroundColor: theme.dark ? '#48484A' : '#6B5A47', bottom: 0, left: 0 }]} />
+          <View style={[styles.screw, { backgroundColor: theme.dark ? '#48484A' : '#6B5A47', bottom: 0, right: 0 }]} />
         </View>
       </View>
     </View>
@@ -250,24 +250,29 @@ const styles = StyleSheet.create({
   },
   dialFrame: {
     width: 70,
-    height: 100,
+    height: 80,
     borderRadius: 8,
     borderWidth: 2,
     overflow: 'hidden',
     position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   dialWindow: {
-    flex: 1,
+    width: 70,
+    height: 60,
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 60,
+    position: 'absolute',
   },
   dialNumbers: {
     alignItems: 'center',
+    justifyContent: 'flex-start',
   },
   numberSlot: {
     height: 60,
+    width: 70,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -275,22 +280,25 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: '700',
     fontFamily: Platform.OS === 'ios' ? 'Courier-Bold' : 'monospace',
+    lineHeight: 60,
   },
   dialTopShadow: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: 20,
+    height: 10,
     pointerEvents: 'none',
+    zIndex: 10,
   },
   dialBottomShadow: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: 20,
+    height: 10,
     pointerEvents: 'none',
+    zIndex: 10,
   },
   buttonsContainer: {
     flexDirection: 'row',
@@ -341,11 +349,3 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 0, 0, 0.3)',
   },
 });
-
-// Position screws in corners
-StyleSheet.flatten([
-  { ...styles.screw, top: 0, left: 0 },
-  { ...styles.screw, top: 0, right: 0 },
-  { ...styles.screw, bottom: 0, left: 0 },
-  { ...styles.screw, bottom: 0, right: 0 },
-]);
