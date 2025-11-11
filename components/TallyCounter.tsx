@@ -18,12 +18,13 @@ interface DialProps {
 
 const Dial: React.FC<DialProps> = ({ digit, position }) => {
   const theme = useTheme();
-  const rotation = useSharedValue(0);
+  const translateY = useSharedValue(0);
   const scale = useSharedValue(1);
 
   React.useEffect(() => {
-    // Animate rotation when digit changes
-    rotation.value = withSpring(digit * -36, {
+    // Animate translation when digit changes
+    // Each number slot is 60px tall, so we move by digit * -60
+    translateY.value = withSpring(digit * -60, {
       damping: 15,
       stiffness: 100,
     });
@@ -43,10 +44,10 @@ const Dial: React.FC<DialProps> = ({ digit, position }) => {
     };
   });
 
-  const dialRotationStyle = useAnimatedStyle(() => {
+  const dialTranslateStyle = useAnimatedStyle(() => {
     return {
       transform: [
-        { rotateX: `${rotation.value}deg` },
+        { translateY: translateY.value },
       ],
     };
   });
@@ -61,7 +62,7 @@ const Dial: React.FC<DialProps> = ({ digit, position }) => {
         }
       ]}>
         <View style={styles.dialWindow}>
-          <Animated.View style={[styles.dialNumbers, dialRotationStyle]}>
+          <Animated.View style={[styles.dialNumbers, dialTranslateStyle]}>
             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
               <View key={num} style={styles.numberSlot}>
                 <Text style={[
@@ -260,13 +261,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
+    height: 60,
   },
   dialNumbers: {
-    position: 'absolute',
     alignItems: 'center',
   },
   numberSlot: {
-    height: 36,
+    height: 60,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -281,6 +282,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 20,
+    pointerEvents: 'none',
   },
   dialBottomShadow: {
     position: 'absolute',
@@ -288,6 +290,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 20,
+    pointerEvents: 'none',
   },
   buttonsContainer: {
     flexDirection: 'row',
