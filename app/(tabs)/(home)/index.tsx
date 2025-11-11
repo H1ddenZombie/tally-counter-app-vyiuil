@@ -71,7 +71,7 @@ export default function HomeScreen() {
 
   const renderHeaderLeft = () => (
     <Pressable
-      onPress={() => Alert.alert("Not Implemented", "This feature is not implemented yet")}
+      onPress={() => setShowInstructions(true)}
       style={styles.headerButtonContainer}
     >
       <IconSymbol
