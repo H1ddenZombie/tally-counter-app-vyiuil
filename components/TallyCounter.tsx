@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -14,6 +14,10 @@ import { useTheme } from '@react-navigation/native';
 interface DialProps {
   digit: number;
   position: number;
+}
+
+interface TallyCounterProps {
+  digitCount?: 2 | 3 | 4;
 }
 
 const DIAL_HEIGHT = 60;
@@ -86,18 +90,30 @@ const Dial: React.FC<DialProps> = ({ digit, position }) => {
   );
 };
 
-export default function TallyCounter() {
+export default function TallyCounter({ digitCount = 4 }: TallyCounterProps) {
   const theme = useTheme();
   const [count, setCount] = useState(0);
   const buttonScale = useSharedValue(1);
 
+  // Calculate max count based on digit count
+  const maxCount = React.useMemo(() => {
+    return Math.pow(10, digitCount) - 1;
+  }, [digitCount]);
+
+  // Reset count if it exceeds the new max when digit count changes
+  useEffect(() => {
+    if (count > maxCount) {
+      setCount(0);
+    }
+  }, [digitCount, maxCount]);
+
   const digits = React.useMemo(() => {
-    const countStr = count.toString().padStart(4, '0');
+    const countStr = count.toString().padStart(digitCount, '0');
     return countStr.split('').map(Number);
-  }, [count]);
+  }, [count, digitCount]);
 
   const handleIncrement = () => {
-    if (count < 9999) {
+    if (count < maxCount) {
       setCount(count + 1);
       if (Platform.OS !== 'web') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -189,13 +205,13 @@ export default function TallyCounter() {
 
           <Pressable
             onPress={handleIncrement}
-            disabled={count === 9999}
+            disabled={count === maxCount}
             style={({ pressed }) => [
               styles.button,
               styles.incrementButton,
               {
                 backgroundColor: theme.dark ? '#3A3A3C' : '#8B7355',
-                opacity: count === 9999 ? 0.4 : pressed ? 0.7 : 1,
+                opacity: count === maxCount ? 0.4 : pressed ? 0.7 : 1,
                 boxShadow: pressed 
                   ? '0px 2px 4px rgba(0, 0, 0, 0.2)' 
                   : '0px 4px 8px rgba(0, 0, 0, 0.3)',

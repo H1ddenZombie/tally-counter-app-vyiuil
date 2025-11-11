@@ -7,16 +7,39 @@ import { useTheme } from "@react-navigation/native";
 import TallyCounter from "@/components/TallyCounter";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BlurView } from "expo-blur";
+import { useFocusEffect } from "@react-navigation/native";
 
 const FIRST_TIME_KEY = '@tally_counter_first_time';
+const DIGIT_COUNT_KEY = '@tally_counter_digit_count';
 
 export default function HomeScreen() {
   const theme = useTheme();
   const [showInstructions, setShowInstructions] = useState(false);
+  const [digitCount, setDigitCount] = useState<2 | 3 | 4>(4);
 
   useEffect(() => {
     checkFirstTime();
+    loadDigitCount();
   }, []);
+
+  // Reload digit count when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      loadDigitCount();
+    }, [])
+  );
+
+  const loadDigitCount = async () => {
+    try {
+      const savedCount = await AsyncStorage.getItem(DIGIT_COUNT_KEY);
+      if (savedCount) {
+        setDigitCount(parseInt(savedCount) as 2 | 3 | 4);
+        console.log('Loaded digit count:', savedCount);
+      }
+    } catch (error) {
+      console.log('Error loading digit count:', error);
+    }
+  };
 
   const checkFirstTime = async () => {
     try {
@@ -58,6 +81,11 @@ export default function HomeScreen() {
     </Pressable>
   );
 
+  const getSubtitleText = () => {
+    const maxCount = Math.pow(10, digitCount) - 1;
+    return `Count up to ${maxCount} with rotating mechanical dials`;
+  };
+
   return (
     <>
       {Platform.OS === 'ios' && (
@@ -82,11 +110,11 @@ export default function HomeScreen() {
               Vintage Tally Counter
             </Text>
             <Text style={[styles.subtitle, { color: theme.dark ? '#8E8E93' : '#666' }]}>
-              Count up to 9999 with rotating mechanical dials
+              {getSubtitleText()}
             </Text>
           </View>
           
-          <TallyCounter />
+          <TallyCounter digitCount={digitCount} />
         </ScrollView>
       </View>
 
@@ -167,6 +195,15 @@ export default function HomeScreen() {
                     </View>
                     <Text style={[styles.instructionText, { color: theme.dark ? '#E5E5E7' : '#333' }]}>
                       Watch the dials rotate like a vintage mechanical counter
+                    </Text>
+                  </View>
+
+                  <View style={styles.instructionItem}>
+                    <View style={[styles.iconCircle, { backgroundColor: theme.dark ? '#2C2C2E' : '#F2F2F7' }]}>
+                      <IconSymbol name="slider.horizontal.3" size={24} color={theme.colors.primary} />
+                    </View>
+                    <Text style={[styles.instructionText, { color: theme.dark ? '#E5E5E7' : '#333' }]}>
+                      Go to Settings to change the number of digits (2, 3, or 4)
                     </Text>
                   </View>
                 </View>
